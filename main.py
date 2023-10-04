@@ -12,11 +12,15 @@ bot = telebot.TeleBot('6440852245:AAE6CiE5QkugkNk2VHKlybHezUx2jdfkg-w')
 
 @bot.message_handler(commands = ['start'])
 def start(message):
+    global users
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
     btn_homeworks = types.KeyboardButton("📚 Домашние задания")
     #btn_topics = types.KeyboardButton("📝 Темы докладов")
     markup.add(btn_homeworks)
-    bot.send_message(message.from_user.id, f"Привет, {message.from_user.username}!\nЧто вы хотели бы узнать?", reply_markup=markup)
+    bot.send_message(message.from_user.id, f"Привет, {message.from_user.first_name}!\nЧто бы ты хотел узнать?\n\nНа данный момент можно посмотреть:\n1) 📚 Домашние задания", reply_markup=markup)
+    if message.from_user.id not in users:
+        users += [message.from_user.id]
+        print(users)
 
 def four_zero_four(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -28,20 +32,29 @@ def select_data_homeworks(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
     btn_homeworksfortomorrow = types.KeyboardButton("📆 На завтра")
     btn_allactivehomeworks = types.KeyboardButton("📋 Все активные")
-    markup.add(btn_homeworksfortomorrow, btn_allactivehomeworks)
+    btn_back = types.KeyboardButton("⬅️ Вернуться в меню")
+    markup.add(btn_homeworksfortomorrow, btn_allactivehomeworks, btn_back)
     bot.send_message(message.from_user.id, "Выберите, какие ДЗ вы хотите увидеть ( 📆 На завтра / 📋 Все активные )", reply_markup=markup)
 
 def homework_for_tomorrow(message):
     tomorrow = list(int(i) for i in pendulum.tomorrow("Europe/Moscow").format('DD.MM.YYYY').split('.'))
+    tomorrow_alternative = list(int(i) for i in pendulum.tomorrow("Europe/Moscow").format('DD.MM.YY').split('.'))
     URL_TEMPLATE = "https://ikbo2123.ru/category/general/homeworks/"
     r = requests.get(URL_TEMPLATE)
     soup = bs(r.text, "html.parser")
     homeworks = soup.find_all('h2', class_='wp-block-post-title')
     verificated_homeworks = []
     for homework in homeworks:
-        tempdata = list(int(i) for i in homework.text[-10:].split('.'))
-        if tomorrow[2] == tempdata[2] and tomorrow[1] == tempdata[1] and tomorrow[0] == tempdata[0]:
-            verificated_homeworks += [[homework.text, homework.a['href']]]
+        try:
+            tempdata = list(int(i) for i in homework.text[-10:].split('.'))
+            if tomorrow[2] == tempdata[2] and tomorrow[1] == tempdata[1] and tomorrow[0] == tempdata[0]:
+                verificated_homeworks += [[homework.text, homework.a['href']]]
+        except:
+            try:
+                tempdata = list(int(i) for i in homework.text[-8:].split('.'))
+                if tomorrow_alternative[2] == tempdata[2] and tomorrow_alternative[1] == tempdata[1] and tomorrow_alternative[0] == tempdata[0]:
+                    verificated_homeworks += [[homework.text, homework.a['href']]]
+            except: continue
     if len(verificated_homeworks) == 0:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
         btn_back = types.KeyboardButton("⬅️ Вернуться в меню")
@@ -60,16 +73,23 @@ def homework_for_tomorrow(message):
 
 def active_homeworks(message):
     tomorrow = list(int(i) for i in pendulum.tomorrow("Europe/Moscow").format('DD.MM.YYYY').split('.'))
+    tomorrow_alternative = list(int(i) for i in pendulum.tomorrow("Europe/Moscow").format('DD.MM.YY').split('.'))
     URL_TEMPLATE = "https://ikbo2123.ru/category/general/homeworks/"
     r = requests.get(URL_TEMPLATE)
     soup = bs(r.text, "html.parser")
     homeworks = soup.find_all('h2', class_='wp-block-post-title')
     verificated_homeworks = []
     for homework in homeworks:
-        tempdata = list(int(i) for i in homework.text[-10:].split('.'))
-        if (tomorrow[2] < tempdata[2]) or (tomorrow[2] == tempdata[2] and tomorrow[1] < tempdata[1]) or (tomorrow[2] == tempdata[2] and tomorrow[1] == tempdata[1] and tomorrow[0] <=tempdata[0]):
-            verificated_homeworks += [[homework.text, homework.a['href']]]
-    print(verificated_homeworks)
+        try:
+            tempdata = list(int(i) for i in homework.text[-10:].split('.'))
+            if (tomorrow[2] < tempdata[2]) or (tomorrow[2] == tempdata[2] and tomorrow[1] < tempdata[1]) or (tomorrow[2] == tempdata[2] and tomorrow[1] == tempdata[1] and tomorrow[0] <=tempdata[0]):
+                verificated_homeworks += [[homework.text, homework.a['href']]]
+        except:
+            try:
+                tempdata = list(int(i) for i in homework.text[-8:].split('.'))
+                if (tomorrow_alternative[2] < tempdata[2]) or (tomorrow_alternative[2] == tempdata[2] and tomorrow_alternative[1] < tempdata[1]) or (tomorrow_alternative[2] == tempdata[2] and tomorrow_alternative[1] == tempdata[1] and tomorrow_alternative[0] <=tempdata[0]):
+                    verificated_homeworks += [[homework.text, homework.a['href']]]
+            except: continue
     if len(verificated_homeworks) == 0:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
         btn_back = types.KeyboardButton("⬅️ Вернуться в меню")
@@ -104,12 +124,7 @@ def get_text_messages(message):
         case _:
             four_zero_four(message)
 
-@bot.message_handler(func=lambda call: True)
-def callback_inline(call):
-    match call:
-        case "gotomenu":
-            start()
-        case _:
-            pass
+# -= Start bot  =- #
 
+users = []
 bot.polling(none_stop=True)
