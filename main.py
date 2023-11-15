@@ -292,7 +292,8 @@ def queue_finaltake(message):
     if str(message.text) in data['queues'].keys():
         if message.from_user.id in list(data['queues'][str(message.text)][0][i][0] for i in range(len(data['queues'][str(message.text)][0]))): #data['queues'][str(message.text)][0].pop(i for i in range(len(data['queues'][str(message.text)][0])) if data['queues'][str(message.text)][0][i][0] == message.from_user.id)
             for i in range(len(data['queues'][str(message.text)][0])):
-                if data['queues'][str(message.text)][0][i][0] == message.from_user.id: queue_delete_and_adjustment(str(message.text), data['queues'][str(message.text)][0][i])
+                print(i, len(data['queues'][str(message.text)][0]))
+                if data['queues'][str(message.text)][0][i][0] == message.from_user.id: queue_delete_and_adjustment(str(message.text), data['queues'][str(message.text)][0][i]); break
         data['queues'][str(message.text)][0] += [[int(message.from_user.id), message.from_user.first_name]]
         print(data['queues'])
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
