@@ -17,7 +17,7 @@ def start(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
     btn_homeworks = types.KeyboardButton("📚 Домашние задания")
     btn_controlworks = types.KeyboardButton("✍️ Контрольные работы")
-    btn_queue = types.KeyboardButton("🗳 Занять очередь")
+    btn_queue = types.KeyboardButton("🗳 Очереди")
     markup.add(btn_homeworks, btn_controlworks, btn_queue)
     bot.send_message(message.from_user.id, f"Привет, {message.from_user.first_name}!\nЧто бы ты хотел узнать?\n\nНа данный момент можно посмотреть:\n1) 📚 Домашние задания\n2) ✍️ Контрольные работы\n3) 🗳 Занять очередь", reply_markup=markup)
     if message.from_user.id not in users:
@@ -96,7 +96,7 @@ def controlworks(message):
 
 def update_homeworks_for_tomorrow():
     global data
-    if time.time() - data['last_timeupdate_for_homeworks_for_tomorrow'] >= 600 or len(data['homeworks_for_tomorrow']) == 0:
+    if time.time() - data['last_timeupdate_for_homeworks_for_tomorrow'] >= delta_time or len(data['homeworks_for_tomorrow']) == 0:
         data['homeworks_for_tomorrow'].clear()
         data['last_timeupdate_for_homeworks_for_tomorrow'] = time.time()
         tomorrow = list(int(i) for i in pendulum.tomorrow("Europe/Moscow").format('DD.MM.YYYY').split('.'))
@@ -121,7 +121,7 @@ def update_homeworks_for_tomorrow():
 
 def update_active_homeworks():
     global data
-    if time.time() - data['last_timeupdate_for_active_homeworks'] >= 600 or len(data['active_homeworks']) == 0:
+    if time.time() - data['last_timeupdate_for_active_homeworks'] >= delta_time or len(data['active_homeworks']) == 0:
         data['active_homeworks'].clear()
         data['last_timeupdate_for_active_homeworks'] = time.time()
         tomorrow = list(int(i) for i in pendulum.tomorrow("Europe/Moscow").format('DD.MM.YYYY').split('.'))
@@ -149,7 +149,7 @@ def update_active_homeworks():
 
 def update_controlworks():
     global data
-    if time.time() - data['last_timeupdate_for_controlworks'] >= 600 or len(data['controlworks']) == 0:
+    if time.time() - data['last_timeupdate_for_controlworks'] >= delta_time or len(data['controlworks']) == 0:
         data['controlworks'].clear()
         data['last_timeupdate_for_controlworks'] = time.time()
         today = list(int(i) for i in pendulum.today("Europe/Moscow").format('DD.MM.YYYY').split('.'))
@@ -480,7 +480,7 @@ def get_text_messages(message):
             active_homeworks(message)
         case "✍️ Контрольные работы":
             controlworks(message)
-        case "🗳 Занять очередь":
+        case "🗳 Очереди":
             if message.from_user.id in owners:
                 queue_general_owners(message)
             else: queue_general(message)
@@ -583,13 +583,14 @@ take_room = []
 leave_room = []
 select_manage_room = []
 select_remove_person = []
+delta_time = 600
 data = {
     'homeworks_for_tomorrow': [],
     'active_homeworks': [],
     'controlworks': [],
-    'last_timeupdate_for_homeworks_for_tomorrow': time.time(),
-    'last_timeupdate_for_active_homeworks': time.time(),
-    'last_timeupdate_for_controlworks': time.time(),
+    'last_timeupdate_for_homeworks_for_tomorrow': 0,
+    'last_timeupdate_for_active_homeworks': 0,
+    'last_timeupdate_for_controlworks': 0,
     'queues': {},
 }
 bot.polling(non_stop=True)
