@@ -201,7 +201,7 @@ def queue_general_owners(message):
     for queue in data['queues'].keys():
         temp_list += f'- {queue}\n'
     if len(temp_list) == 0: temp_list = 'Нет активных очередей!\n'
-    bot.send_message(message.from_user.id, f"Выберите, что хотите сделать?\n\nАктивные очереди:\n{temp_list}\nДействия:\n1) 📨 Занять очередь\n2) 🚪 Выйти из очереди\n3) 🪄 Создать очередь\n4) 🎚 Управлять очередью\n5) 🗑 Удалить очередь\n", reply_markup=markup)
+    bot.send_message(message.from_user.id, f"🗳 Очереди (для админов)\n\nАктивные очереди:\n{temp_list}\nВыберите, что хотите сделать?\n\nДействия:\n1) 📨 Занять очередь\n2) 🚪 Выйти из очереди\n3) 🪄 Создать очередь\n4) 🎚 Управлять очередью\n5) 🗑 Удалить очередь\n", reply_markup=markup)
 
 def queue_general(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
@@ -213,7 +213,7 @@ def queue_general(message):
     for queue in data['queues'].keys():
         temp_list += f'- {queue}\n'
     if len(temp_list) == 0: temp_list = 'Нет активных очередей!\n'
-    bot.send_message(message.from_user.id, f"Выберите, что хотите сделать?\n\nАктивные очереди:\n{temp_list}\nДействия:\n1) 📨 Занять очередь\n2) 🚪 Выйти из очереди\n", reply_markup=markup)
+    bot.send_message(message.from_user.id, f"🗳 Очереди\n\nАктивные очереди:\n{temp_list}\nВыберите, что хотите сделать?\n\nДействия:\n1) 📨 Занять очередь\n2) 🚪 Выйти из очереди\n", reply_markup=markup)
 
 # -= Создание очередей =-
 def queue_create_owners(message):
