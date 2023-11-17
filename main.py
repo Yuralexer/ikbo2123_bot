@@ -19,7 +19,7 @@ def start(message):
     btn_controlworks = types.KeyboardButton("✍️ Контрольные работы")
     btn_queue = types.KeyboardButton("🗳 Очереди")
     markup.add(btn_homeworks, btn_controlworks, btn_queue)
-    bot.send_message(message.from_user.id, f"Привет, {message.from_user.first_name}!\nЧто бы ты хотел узнать?\n\nНа данный момент можно посмотреть:\n1) 📚 Домашние задания\n2) ✍️ Контрольные работы\n3) 🗳 Занять очередь", reply_markup=markup)
+    bot.send_message(message.from_user.id, f"Привет, {message.from_user.first_name}!\nЧто бы ты хотел узнать?\n\nНа данный момент можно посмотреть:\n1) 📚 Домашние задания\n2) ✍️ Контрольные работы\n3) 🗳 Очереди", reply_markup=markup)
     if message.from_user.id not in users:
         users += [message.from_user.id]
         print(users)
@@ -133,8 +133,7 @@ def update_active_homeworks():
         for homework in homeworks:
             try:
                 tempdata = list(int(i) for i in homework.text[-10:].split('.'))
-                if (tomorrow[2] < tempdata[2]) or (tomorrow[2] == tempdata[2] and tomorrow[1] < tempdata[1]) or (
-                        tomorrow[2] == tempdata[2] and tomorrow[1] == tempdata[1] and tomorrow[0] <= tempdata[0]):
+                if (tomorrow[2] < tempdata[2]) or (tomorrow[2] == tempdata[2] and tomorrow[1] < tempdata[1]) or (tomorrow[2] == tempdata[2] and tomorrow[1] == tempdata[1] and tomorrow[0] <= tempdata[0]):
                     data['active_homeworks'] += [[homework.text, homework.a['href']]]
             except:
                 try:
