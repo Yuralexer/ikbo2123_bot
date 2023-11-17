@@ -298,7 +298,7 @@ def queue_finaltake(message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
         btn_back = types.KeyboardButton("⬅️ Вернуться в меню")
         markup.add(btn_back)
-        bot.send_message(message.from_user.id, f"Вы были закинуты в очередь \"{message.text}\"!\n", reply_markup=markup)
+        bot.send_message(message.from_user.id, f"Вы были закинуты в очередь \"{message.text}\"!\n\n🥁 Ваш номер в очереди: {data['queues'][message.text][0].index([message.from_user.id, message.from_user.first_name])+1}", reply_markup=markup)
     else:
         queue_failfind(message)
 
