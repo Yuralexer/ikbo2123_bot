@@ -45,7 +45,7 @@ def homework_for_today(message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
         btn_back = types.KeyboardButton("⬅️ Вернуться в меню")
         markup.add(btn_back)
-        bot.send_message(message.from_user.id, "Ура! Домашки на завтра отсутствуют 😊", reply_markup=markup)
+        bot.send_message(message.from_user.id, "Ура! Домашки на сегодня отсутствуют 😊", reply_markup=markup)
     else:
         markupInline = types.InlineKeyboardMarkup()
         for vhomework in data['homeworks_for_today']:
