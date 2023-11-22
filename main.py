@@ -32,11 +32,30 @@ def four_zero_four(message):
 
 def select_data_homeworks(message):
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+    btn_homeworksfortoday = types.KeyboardButton("⚡️ На сегодня")
     btn_homeworksfortomorrow = types.KeyboardButton("📆 На завтра")
     btn_allactivehomeworks = types.KeyboardButton("📋 Все активные")
     btn_back = types.KeyboardButton("⬅️ Вернуться в меню")
-    markup.add(btn_homeworksfortomorrow, btn_allactivehomeworks, btn_back)
-    bot.send_message(message.from_user.id, "Выберите, какие ДЗ вы хотите увидеть ( 📆 На завтра / 📋 Все активные )", reply_markup=markup)
+    markup.add(btn_homeworksfortoday, btn_homeworksfortomorrow, btn_allactivehomeworks, btn_back)
+    bot.send_message(message.from_user.id, "Выберите, какие ДЗ вы хотите увидеть ( ⚡️ На сегодня / 📆 На завтра / 📋 Все активные )", reply_markup=markup)
+
+def homework_for_today(message):
+    update_homeworks_for_today()
+    if len(data['homeworks_for_today']) == 0:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+        btn_back = types.KeyboardButton("⬅️ Вернуться в меню")
+        markup.add(btn_back)
+        bot.send_message(message.from_user.id, "Ура! Домашки на завтра отсутствуют 😊", reply_markup=markup)
+    else:
+        markupInline = types.InlineKeyboardMarkup()
+        for vhomework in data['homeworks_for_today']:
+            btn_In_Temp = types.InlineKeyboardButton(text=vhomework[0], url=vhomework[1])
+            markupInline.add(btn_In_Temp)
+        bot.send_message(message.from_user.id, "⚡️ Домашние задания на сегодня:", reply_markup=markupInline)
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
+        btn_back = types.KeyboardButton("⬅️ Вернуться в меню")
+        markup.add(btn_back)
+        bot.send_message(message.from_user.id, "Другие ДЗ смотрите на сайте ikbo2123.ru", reply_markup=markup)
 
 def homework_for_tomorrow(message):
     update_homeworks_for_tomorrow()
@@ -93,6 +112,31 @@ def controlworks(message):
         bot.send_message(message.from_user.id, "Остальную информацию вы можете найти на сайте ikbo2123.ru", reply_markup=markup)
 
 # -= Data Update =- #
+
+def update_homeworks_for_today():
+    global data
+    if time.time() - data['last_timeupdate_for_homeworks_for_today'] >= delta_time or len(data['homeworks_for_today']) == 0:
+        data['homeworks_for_today'].clear()
+        data['last_timeupdate_for_homeworks_for_today'] = time.time()
+        today = list(int(i) for i in pendulum.today("Europe/Moscow").format('DD.MM.YYYY').split('.'))
+        today_alternative = list(int(i) for i in pendulum.today("Europe/Moscow").format('DD.MM.YY').split('.'))
+        URL_TEMPLATE = "https://ikbo2123.ru/category/general/homeworks/"
+        r = requests.get(URL_TEMPLATE)
+        soup = bs(r.text, "html.parser")
+        homeworks = soup.find_all('h2', class_='wp-block-post-title')
+        for homework in homeworks:
+            try:
+                tempdata = list(int(i) for i in homework.text[-10:].split('.'))
+                if today[2] == tempdata[2] and today[1] == tempdata[1] and today[0] == tempdata[0]:
+                    data['homeworks_for_today'] += [[homework.text, homework.a['href']]]
+            except:
+                try:
+                    tempdata = list(int(i) for i in homework.text[-8:].split('.'))
+                    if tomorrow_alternative[2] == tempdata[2] and tomorrow_alternative[1] == tempdata[1] and \
+                            tomorrow_alternative[0] == tempdata[0]:
+                        data['homeworks_for_today'] += [[homework.text, homework.a['href']]]
+                except:
+                    continue
 
 def update_homeworks_for_tomorrow():
     global data
@@ -473,6 +517,8 @@ def get_text_messages(message):
     match message.text:
         case "📚 Домашние задания":
             select_data_homeworks(message)
+        case "⚡️ На сегодня":
+            homework_for_today(message)
         case "📆 На завтра":
             homework_for_tomorrow(message)
         case "📋 Все активные":
@@ -584,9 +630,11 @@ select_manage_room = []
 select_remove_person = []
 delta_time = 600
 data = {
+    'homeworks_for_today': [],
     'homeworks_for_tomorrow': [],
     'active_homeworks': [],
     'controlworks': [],
+    'last_timeupdate_for_homeworks_for_today': 0,
     'last_timeupdate_for_homeworks_for_tomorrow': 0,
     'last_timeupdate_for_active_homeworks': 0,
     'last_timeupdate_for_controlworks': 0,
